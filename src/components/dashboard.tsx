@@ -5,17 +5,6 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Radio,
-  RadioGroup,
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
   TabGroup,
 } from "@headlessui/react";
 import {
@@ -28,17 +17,11 @@ import {
   Leaf,
   AlertTriangle,
   Info,
-  Check,
-  ChevronDown,
 } from "lucide-react";
-import { IoFemale, IoMale } from "react-icons/io5";
 import {
-  medicalConditions,
-  ageRanges,
   languages,
   clarityLevels,
   type UserSettings,
-  defaultSettings,
 } from "./settings/options";
 import { getStoredSettings, saveSettings } from "@/lib/utils";
 import SettingsPanel from "./settings/SettingsPanel";
@@ -61,30 +44,6 @@ export default function Dashboard() {
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
-
-  const handleSexChange = (newSex: "male" | "female") => {
-    setSettings((prev) => ({
-      ...prev,
-      sex: newSex,
-      conditions: prev.conditions.filter((condition) =>
-        medicalConditions.shared.some((c) => c.id === condition)
-      ),
-    }));
-  };
-
-  const handleConditionToggle = (conditionId: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      conditions: prev.conditions.includes(conditionId)
-        ? prev.conditions.filter((c) => c !== conditionId)
-        : [...prev.conditions, conditionId],
-    }));
-  };
-
-  const getAvailableConditions = () => [
-    ...medicalConditions.shared,
-    ...medicalConditions[settings.sex],
-  ];
 
   const handleCameraClick = () => {
     // Placeholder for camera functionality
