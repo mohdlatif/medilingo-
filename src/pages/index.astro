@@ -1,9 +1,10 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
+import Dashboard from "@/components/dashboard";
 ---
 
 <Layout title="MediLingo+">
   <div>
-    <h1>MediLingo+</h1>
+    <Dashboard client:load />
   </div>
 </Layout>
