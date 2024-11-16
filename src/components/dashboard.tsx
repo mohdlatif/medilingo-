@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import {
   Tab,
   Select,
+  TabList,
+  TabPanel,
+  TabPanels,
   Radio,
   RadioGroup,
   Listbox,
@@ -13,6 +16,7 @@ import {
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
+  TabGroup,
 } from "@headlessui/react";
 import {
   Camera,
@@ -576,8 +580,8 @@ export default function Dashboard() {
           {selectedMedicine && (
             <div>
               <h2 className="text-2xl font-bold mb-4">{selectedMedicine}</h2>
-              <Tab.Group>
-                <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+              <TabGroup>
+                <TabList className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
                   {[
                     "Overview",
                     "Ingredients",
@@ -599,9 +603,9 @@ export default function Dashboard() {
                       {category}
                     </Tab>
                   ))}
-                </Tab.List>
-                <Tab.Panels className="mt-2">
-                  <Tab.Panel className="rounded-xl bg-white p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2">
+                </TabList>
+                <TabPanels className="mt-2">
+                  <TabPanel className="rounded-xl bg-white p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium">
                         <Info className="inline h-5 w-5 mr-1" /> Overview
@@ -617,7 +621,7 @@ export default function Dashboard() {
                     <p className="mt-2">
                       Purpose and usage information for {selectedMedicine}.
                     </p>
-                  </Tab.Panel>
+                  </TabPanel>
                   <Tab.Panel className="rounded-xl bg-white p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium">
@@ -675,8 +679,8 @@ export default function Dashboard() {
                       {selectedMedicine}.
                     </p>
                   </Tab.Panel>
-                </Tab.Panels>
-              </Tab.Group>
+                </TabPanels>
+              </TabGroup>
             </div>
           )}
         </div>
