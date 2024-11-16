@@ -8,3 +8,47 @@ import Dashboard from "@/components/dashboard";
     <Dashboard client:load />
   </div>
 </Layout>
+<script is:inline>
+  function getLocationError(error, instance) {
+    let text = "There was an error sharing my location.";
+    // See https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError.
+    if (error.code === GeolocationPositionError.PERMISSION_DENIED) {
+      text = "I don't want to share my location at this time.";
+    } else if (error.code === GeolocationPositionError.POSITION_UNAVAILABLE) {
+      text = "The browser encountered an error sharing my location.";
+    }
+    instance.send({ input: { text } });
+  }
+
+  window.watsonAssistantChatOptions = {
+    integrationID: "014df85f-00b8-4372-8bb7-80fe1988a97a", // The ID of this integration.
+    region: "eu-de", // The region your integration is hosted in.
+    serviceInstanceID: "7a8af923-faf2-4b22-8822-f29c70886c77", // The ID of your service instance.
+    onLoad: async (instance) => {
+      await instance.render();
+    },
+  };
+  setTimeout(function () {
+    const t = document.createElement("script");
+    t.src =
+      "https://web-chat.global.assistant.watson.appdomain.cloud/versions/" +
+      (window.watsonAssistantChatOptions.clientVersion || "latest") +
+      "/WatsonAssistantChatEntry.js";
+    document.head.appendChild(t);
+  });
+</script>
+
+<style is:global>
+  .WACBotContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 180px; /* Adjust this value as needed */
+  }
+
+  /* #WACInputContainer-TextArea {
+    background: red !important;
+  } */
+</style>

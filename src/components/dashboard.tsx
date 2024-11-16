@@ -60,7 +60,7 @@ export default function Dashboard() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setSelectedMedicine(searchQuery);
-      // Clear the imgAnalyzed data when manually searching
+      sendToWatson(`Tell me about ${searchQuery}`);
       setImgAnalyzed(null);
     }
   };
@@ -98,6 +98,7 @@ export default function Dashboard() {
 
       if (data.medicineName) {
         setSelectedMedicine(data.medicineName);
+        sendToWatson(`Tell me about ${data.medicineName}`);
         toast.success(`Detected: ${data.medicineName}`);
       } else {
         toast.warning("Could not detect medicine name clearly");
@@ -119,6 +120,19 @@ export default function Dashboard() {
       : languages.filter((language) =>
           language.name.toLowerCase().includes(languageQuery.toLowerCase())
         );
+
+  const sendToWatson = (text: string) => {
+    // Get the instance using the global chat options
+    const instance = (window as any).watsonAssistantChatOptions?.instance;
+
+    if (instance) {
+      instance.send({
+        input: { text },
+      });
+    } else {
+      console.warn("Watson Assistant instance not ready");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
