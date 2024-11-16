@@ -25,6 +25,8 @@ import {
 } from "./settings/options";
 import { getStoredSettings, saveSettings } from "@/lib/utils";
 import SettingsPanel from "./settings/SettingsPanel";
+import ImageUpload from "./ImageUpload";
+import { toast, Toaster } from "sonner";
 
 export default function Dashboard() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -40,26 +42,75 @@ export default function Dashboard() {
       clarityLevels[0]
     );
   });
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [imgAnalyzed, setImgAnalyzed] = useState<{
+    medicineName: string;
+    alternativeNames: string[];
+    fullText: string;
+    objects: string[];
+    logos: string[];
+    labels: string[];
+  } | null>(null);
 
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
 
-  const handleCameraClick = () => {
-    // Placeholder for camera functionality
-    console.log("Camera clicked");
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSelectedMedicine(searchQuery);
-    // Placeholder for search functionality
-    console.log("Searching for:", searchQuery);
+    if (searchQuery.trim()) {
+      setSelectedMedicine(searchQuery);
+      // Clear the imgAnalyzed data when manually searching
+      setImgAnalyzed(null);
+    }
   };
 
   const handleSpeak = (text: string) => {
     // Placeholder for voice output functionality
     console.log("Speaking:", text);
+  };
+
+  const handleImageCapture = async (file: File) => {
+    setIsAnalyzing(true);
+    try {
+      const reader = new FileReader();
+
+      const result = await new Promise((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const response = await fetch("/api/img-analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: result }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze image");
+      }
+
+      const data = await response.json();
+      setImgAnalyzed(data);
+
+      if (data.medicineName) {
+        setSelectedMedicine(data.medicineName);
+        toast.success(`Detected: ${data.medicineName}`);
+      } else {
+        toast.warning("Could not detect medicine name clearly");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error processing image:", error);
+      toast.error("Failed to analyze image");
+      throw error;
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const filteredLanguages =
@@ -71,6 +122,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
+      <Toaster position="bottom-right" />
       <header className="bg-emerald-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
@@ -112,34 +164,35 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-lg shadow-md p-4">
           <div className="flex space-x-4 mb-4">
-            <button
-              onClick={handleCameraClick}
-              className="flex-1 bg-emerald-500 text-white p-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-emerald-600 transition-colors"
-              aria-label="Scan Medicine"
-            >
-              <Camera className="h-6 w-6" />
-              <span>Scan Medicine</span>
-            </button>
+            <ImageUpload
+              onImageCapture={handleImageCapture}
+              isAnalyzing={isAnalyzing}
+            />
             <form onSubmit={handleSearch} className="flex-1 flex">
               <input
                 type="text"
-                placeholder="Search medicine..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value === "") {
+                    setSelectedMedicine("");
+                    setImgAnalyzed(null);
+                  }
+                }}
+                placeholder="Enter medicine name..."
+                className="flex-1 rounded-l-lg border-y border-l border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
               <button
                 type="submit"
-                className="bg-emerald-500 text-white p-3 rounded-r-lg hover:bg-emerald-600 transition-colors"
-                aria-label="Search"
+                className="bg-emerald-500 text-white px-6 py-2 rounded-r-lg hover:bg-emerald-600 transition-colors"
               >
-                <Search className="h-6 w-6" />
+                <Search className="h-5 w-5" />
               </button>
             </form>
           </div>
 
           {selectedMedicine && (
-            <div>
+            <div className="mt-4" id="medicine-info">
               <h2 className="text-2xl font-bold mb-4">{selectedMedicine}</h2>
               <TabGroup>
                 <TabList className="flex space-x-1 rounded-xl bg-emerald-900/20 p-1">
@@ -171,6 +224,7 @@ export default function Dashboard() {
                       <h3 className="text-lg font-medium">
                         <Info className="inline h-5 w-5 mr-1" /> Overview
                       </h3>
+
                       <button
                         onClick={() => handleSpeak("Overview information")}
                         className="bg-emerald-500 text-white p-2 rounded-full hover:bg-emerald-600 transition-colors"
@@ -179,9 +233,56 @@ export default function Dashboard() {
                         <Volume2 className="h-5 w-5" />
                       </button>
                     </div>
-                    <p className="mt-2">
+                    <p className="mt-2 text-gray-600">
                       Purpose and usage information for {selectedMedicine}.
                     </p>
+                    {imgAnalyzed && (
+                      <div className="mt-4 space-y-4">
+                        {imgAnalyzed.alternativeNames.length > 0 && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <h4 className="font-medium text-gray-700 mb-2">
+                              Also known as:
+                            </h4>
+                            <ul className="list-disc list-inside text-gray-600">
+                              {imgAnalyzed.alternativeNames.map(
+                                (name, index) => (
+                                  <li key={index}>{name}</li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        )}
+
+                        {imgAnalyzed.labels.length > 0 && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <h4 className="font-medium text-gray-700 mb-2">
+                              Identified Features:
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {imgAnalyzed.labels.map((label, index) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm"
+                                >
+                                  {label}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {imgAnalyzed.fullText && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <h4 className="font-medium text-gray-700 mb-2">
+                              Package Information:
+                            </h4>
+                            <p className="text-gray-600 whitespace-pre-line text-sm">
+                              {imgAnalyzed.fullText}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </TabPanel>
                   <TabPanel className="rounded-xl bg-white p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2">
                     <div className="flex items-center justify-between">
@@ -196,7 +297,7 @@ export default function Dashboard() {
                         <Volume2 className="h-5 w-5" />
                       </button>
                     </div>
-                    <p className="mt-2">
+                    <p className="mt-2  text-gray-600">
                       Active and inactive compounds in {selectedMedicine}.
                     </p>
                   </TabPanel>
@@ -214,7 +315,7 @@ export default function Dashboard() {
                         <Volume2 className="h-5 w-5" />
                       </button>
                     </div>
-                    <p className="mt-2">
+                    <p className="mt-2  text-gray-600">
                       Common, rare, and severe side effects of{" "}
                       {selectedMedicine}.
                     </p>
@@ -235,7 +336,7 @@ export default function Dashboard() {
                         <Volume2 className="h-5 w-5" />
                       </button>
                     </div>
-                    <p className="mt-2">
+                    <p className="mt-2 text-gray-600">
                       Natural remedies and warnings related to{" "}
                       {selectedMedicine}.
                     </p>

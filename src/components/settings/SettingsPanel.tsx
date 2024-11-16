@@ -156,7 +156,7 @@ export default function SettingsPanel({
             <span className="block text-lg font-medium text-emerald-900 mb-3">
               Medical Conditions
             </span>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               {getAvailableConditions().map((condition) => (
                 <label
                   key={condition.id}
