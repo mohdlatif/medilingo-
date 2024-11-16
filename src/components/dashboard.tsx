@@ -32,65 +32,15 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { IoFemale, IoMale } from "react-icons/io5";
-
-const medicalConditions = {
-  shared: [{ id: "chronic", label: "Chronic Illness" }],
-  female: [
-    { id: "pregnancy", label: "Pregnancy" },
-    { id: "breastfeeding", label: "Breastfeeding" },
-  ],
-  male: [{ id: "bigBelly", label: "Big Belly" }],
-};
-
-interface UserSettings {
-  sex: "male" | "female";
-  age: { id: number; range: string };
-  conditions: string[];
-  language: { id: string; name: string };
-  proficiency: { id: string; label: string };
-}
-
-const defaultSettings: UserSettings = {
-  sex: "female",
-  age: { id: 2, range: "19-30 years" },
-  conditions: [],
-  language: { id: "en", name: "English" },
-  proficiency: { id: "easy", label: "Basic" },
-};
-
-const getStoredSettings = (): UserSettings => {
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("userSettings");
-    return saved ? JSON.parse(saved) : defaultSettings;
-  }
-  return defaultSettings;
-};
-
-const saveSettings = (settings: UserSettings) => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("userSettings", JSON.stringify(settings));
-  }
-};
-
-const languages = [
-  { id: "en", name: "English" },
-  { id: "es", name: "Spanish" },
-  { id: "fr", name: "French" },
-  { id: "de", name: "German" },
-  { id: "it", name: "Italian" },
-  { id: "pt", name: "Portuguese" },
-  { id: "ru", name: "Russian" },
-  { id: "zh", name: "Chinese" },
-  { id: "ja", name: "Japanese" },
-  { id: "ko", name: "Korean" },
-  // Add more languages as needed
-];
-
-const proficiencyLevels = [
-  { id: "easy", label: "Basic" },
-  { id: "medium", label: "Intermediate" },
-  { id: "hard", label: "Advanced" },
-];
+import {
+  medicalConditions,
+  ageRanges,
+  languages,
+  clarityLevels,
+  type UserSettings,
+  defaultSettings,
+} from "./settings/options";
+import { getStoredSettings, saveSettings } from "@/lib/utils";
 
 export default function Dashboard() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -99,9 +49,7 @@ export default function Dashboard() {
   const [settings, setSettings] = useState<UserSettings>(getStoredSettings);
   const [languageQuery, setLanguageQuery] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
-  const [selectedProficiency, setSelectedProficiency] = useState(
-    proficiencyLevels[0]
-  );
+  const [selectedClarity, setSelectedClarity] = useState(clarityLevels[0]);
 
   useEffect(() => {
     saveSettings(settings);
@@ -131,13 +79,6 @@ export default function Dashboard() {
     ...medicalConditions[settings.sex],
   ];
 
-  const ageRanges = [
-    { id: 1, range: "0-18 years" },
-    { id: 2, range: "19-30 years" },
-    { id: 3, range: "31-50 years" },
-    { id: 4, range: "51+ years" },
-  ];
-
   const handleCameraClick = () => {
     // Placeholder for camera functionality
     console.log("Camera clicked");
@@ -164,7 +105,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
-      <header className="bg-blue-600 text-white p-4 shadow-md">
+      <header className="bg-emerald-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Pill className="h-8 w-8" />
@@ -172,7 +113,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="p-2 rounded-full hover:bg-blue-700 transition-colors"
+            className="p-2 rounded-full hover:bg-emerald-700 transition-colors"
             aria-label={isSettingsOpen ? "Close settings" : "Open settings"}
           >
             {isSettingsOpen ? (
@@ -281,7 +222,16 @@ export default function Dashboard() {
                           type="checkbox"
                           checked={settings.conditions.includes(condition.id)}
                           onChange={() => handleConditionToggle(condition.id)}
-                          className="h-5 w-5 text-emerald-500 focus:ring-emerald-500 border-gray-300 rounded-md"
+                          className="h-5 w-5 rounded-md
+                            text-emerald-600
+                            border-emerald-300
+                            focus:ring-emerald-500
+                            focus:ring-offset-0
+                            focus:ring-2
+                            checked:bg-emerald-600
+                            checked:hover:bg-emerald-700
+                            indeterminate:bg-emerald-600
+                            hover:cursor-pointer"
                         />
                         <span className="ml-3 text-gray-700 group-hover:text-emerald-900 font-medium">
                           {condition.label}
@@ -467,14 +417,14 @@ export default function Dashboard() {
                       </Combobox>
                     </div>
 
-                    {/* Proficiency Selection */}
+                    {/* Clarity Selection */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Proficiency Level
+                        Clarity Level
                       </label>
                       <Listbox
-                        value={selectedProficiency}
-                        onChange={setSelectedProficiency}
+                        value={selectedClarity}
+                        onChange={setSelectedClarity}
                       >
                         <div className="relative">
                           <ListboxButton
@@ -483,7 +433,7 @@ export default function Dashboard() {
                               focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                           >
                             <span className="block truncate text-gray-700">
-                              {selectedProficiency.label}
+                              {selectedClarity.label}
                             </span>
                             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                               <ChevronDown
@@ -496,7 +446,7 @@ export default function Dashboard() {
                             className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1
                               text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                           >
-                            {proficiencyLevels.map((level) => (
+                            {clarityLevels.map((level) => (
                               <ListboxOption
                                 key={level.id}
                                 value={level}
@@ -522,11 +472,11 @@ export default function Dashboard() {
                                     {selected ? (
                                       <span
                                         className={`absolute inset-y-0 left-0 flex items-center pl-3
-                                          ${
-                                            active
-                                              ? "text-emerald-600"
-                                              : "text-emerald-500"
-                                          }`}
+                                        ${
+                                          active
+                                            ? "text-emerald-600"
+                                            : "text-emerald-500"
+                                        }`}
                                       >
                                         <Check
                                           className="h-5 w-5"
@@ -553,7 +503,7 @@ export default function Dashboard() {
           <div className="flex space-x-4 mb-4">
             <button
               onClick={handleCameraClick}
-              className="flex-1 bg-blue-500 text-white p-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-600 transition-colors"
+              className="flex-1 bg-emerald-500 text-white p-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-emerald-600 transition-colors"
               aria-label="Scan Medicine"
             >
               <Camera className="h-6 w-6" />
@@ -565,11 +515,11 @@ export default function Dashboard() {
                 placeholder="Search medicine..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <button
                 type="submit"
-                className="bg-blue-500 text-white p-3 rounded-r-lg hover:bg-blue-600 transition-colors"
+                className="bg-emerald-500 text-white p-3 rounded-r-lg hover:bg-emerald-600 transition-colors"
                 aria-label="Search"
               >
                 <Search className="h-6 w-6" />
@@ -581,7 +531,7 @@ export default function Dashboard() {
             <div>
               <h2 className="text-2xl font-bold mb-4">{selectedMedicine}</h2>
               <TabGroup>
-                <TabList className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+                <TabList className="flex space-x-1 rounded-xl bg-emerald-900/20 p-1">
                   {[
                     "Overview",
                     "Ingredients",
@@ -591,12 +541,12 @@ export default function Dashboard() {
                     <Tab
                       key={category}
                       className={({ selected }) =>
-                        `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700
-                        ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2
+                        `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-emerald-700
+                        ring-white ring-opacity-60 ring-offset-2 ring-offset-emerald-400 focus:outline-none focus:ring-2
                         ${
                           selected
                             ? "bg-white shadow"
-                            : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
+                            : "text-emerald-100 hover:bg-white/[0.12] hover:text-white"
                         }`
                       }
                     >
@@ -612,7 +562,7 @@ export default function Dashboard() {
                       </h3>
                       <button
                         onClick={() => handleSpeak("Overview information")}
-                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                        className="bg-emerald-500 text-white p-2 rounded-full hover:bg-emerald-600 transition-colors"
                         aria-label="Speak Overview"
                       >
                         <Volume2 className="h-5 w-5" />
@@ -629,7 +579,7 @@ export default function Dashboard() {
                       </h3>
                       <button
                         onClick={() => handleSpeak("Ingredients information")}
-                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                        className="bg-emerald-500 text-white p-2 rounded-full hover:bg-emerald-600 transition-colors"
                         aria-label="Speak Ingredients"
                       >
                         <Volume2 className="h-5 w-5" />
@@ -647,7 +597,7 @@ export default function Dashboard() {
                       </h3>
                       <button
                         onClick={() => handleSpeak("Side effects information")}
-                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                        className="bg-emerald-500 text-white p-2 rounded-full hover:bg-emerald-600 transition-colors"
                         aria-label="Speak Side Effects"
                       >
                         <Volume2 className="h-5 w-5" />
@@ -668,7 +618,7 @@ export default function Dashboard() {
                         onClick={() =>
                           handleSpeak("Herbal alternatives information")
                         }
-                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                        className="bg-emerald-500 text-white p-2 rounded-full hover:bg-emerald-600 transition-colors"
                         aria-label="Speak Herbal Alternatives"
                       >
                         <Volume2 className="h-5 w-5" />
