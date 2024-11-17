@@ -92,11 +92,12 @@ The user requested that you use ${selectedClarity.label.toLowerCase()} clarity l
       fdaData,
       sideEffectData,
       async getWatsonData() {
-        const watsonResponse = await fetch("/api/watson", {
+        const watsonResponse = await fetch("/api/watsonx", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            prompt: fdaData,
+            fdaData,
+            sideEffectData,
             userSettings: userSettingsText,
           }),
         });

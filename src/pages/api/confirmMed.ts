@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
       stop: ["\n"],
     });
 
-    console.log(response);
+    // console.log(response);
     // Return only the content from choices
     return new Response(
       JSON.stringify({
