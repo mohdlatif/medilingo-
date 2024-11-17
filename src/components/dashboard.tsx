@@ -28,6 +28,13 @@ import SettingsPanel from "./settings/SettingsPanel";
 import ImageUpload from "./ImageUpload";
 import { toast, Toaster } from "sonner";
 
+// Add at the top of the file, after imports
+declare global {
+  interface Window {
+    sendWatsonMessage: (message: string) => Promise<void>;
+  }
+}
+
 export default function Dashboard() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,11 +63,16 @@ export default function Dashboard() {
     saveSettings(settings);
   }, [settings]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       setSelectedMedicine(searchQuery);
-      sendToWatson(`Tell me about ${searchQuery}`);
+      try {
+        await window.sendWatsonMessage(`Tell me about ${searchQuery}`);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        toast.error("Failed to connect to assistant");
+      }
       setImgAnalyzed(null);
     }
   };
@@ -98,8 +110,13 @@ export default function Dashboard() {
 
       if (data.medicineName) {
         setSelectedMedicine(data.medicineName);
-        sendToWatson(`Tell me about ${data.medicineName}`);
-        toast.success(`Detected: ${data.medicineName}`);
+        try {
+          await window.sendWatsonMessage(`Tell me about ${data.medicineName}`);
+          toast.success(`Detected: ${data.medicineName}`);
+        } catch (error) {
+          console.error("Failed to send message:", error);
+          toast.error("Failed to connect to assistant");
+        }
       } else {
         toast.warning("Could not detect medicine name clearly");
       }
@@ -121,21 +138,8 @@ export default function Dashboard() {
           language.name.toLowerCase().includes(languageQuery.toLowerCase())
         );
 
-  const sendToWatson = (text: string) => {
-    // Get the instance using the global chat options
-    const instance = (window as any).watsonAssistantChatOptions?.instance;
-
-    if (instance) {
-      instance.send({
-        input: { text },
-      });
-    } else {
-      console.warn("Watson Assistant instance not ready");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <div className=" bg-gray-100 text-gray-900">
       <Toaster position="bottom-right" />
       <header className="bg-emerald-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">

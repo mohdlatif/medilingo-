@@ -9,6 +9,26 @@ import Dashboard from "@/components/dashboard";
   </div>
 </Layout>
 <script is:inline>
+  function takeLocation(data, instance) {
+    // Send a message to the assistant to indicate the user has shared their location and include as context variables
+    // the actual location values.
+    instance.send({
+      input: {
+        text: "Ok I've shared my location.",
+      },
+      context: {
+        skills: {
+          "actions skill": {
+            skill_variables: {
+              User_Latitude: data.coords.latitude,
+              User_Longitude: data.coords.longitude,
+            },
+          },
+        },
+      },
+    });
+  }
+
   function getLocationError(error, instance) {
     let text = "There was an error sharing my location.";
     // See https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError.
@@ -20,12 +40,87 @@ import Dashboard from "@/components/dashboard";
     instance.send({ input: { text } });
   }
 
+  function receiveHandler(event, instance) {
+    event.data.output?.generic?.forEach((item) => {
+      // If the response includes a "share_location" item, then ask the browser for the user's location.
+      if (
+        item.user_defined &&
+        item.user_defined.user_defined_type === "share_location"
+      ) {
+        // See https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition for more info.
+        navigator.geolocation.getCurrentPosition(
+          (data) => takeLocation(data, instance),
+          (error) => getLocationError(error, instance)
+        );
+      }
+    });
+  }
+
+  async function onLoad(instance) {
+    // We will need to listen for the "receive" event so we can ask for the user's location when needed.
+    instance.on({ type: "receive", handler: receiveHandler });
+
+    await instance.render();
+  }
+  // function moveWatsonWidget() {
+  //   const observer = new MutationObserver((mutations, obs) => {
+  //     const watsonWidget = document.querySelector(".WatsonAssistantChatHost");
+  //     const targetPanel = document.querySelector('[role="tabpanel"]');
+
+  //     if (watsonWidget && targetPanel) {
+  //       targetPanel.appendChild(watsonWidget);
+  //       obs.disconnect(); // Stop observing once moved
+  //     }
+  //   });
+
+  //   // Start observing the document for the widget to appear
+  //   observer.observe(document, {
+  //     childList: true,
+  //     subtree: true,
+  //   });
+  // }
+
+  // Create a function that waits for the instance to be ready
+  window.getWatsonInstance = async function (maxAttempts = 10) {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+
+      const checkInstance = () => {
+        const instance = window.watsonAssistantChatOptions?.instance;
+        if (instance) {
+          resolve(instance);
+        } else if (attempts < maxAttempts) {
+          attempts++;
+          setTimeout(checkInstance, 500); // Try again in 500ms
+        } else {
+          reject(new Error("Failed to get Watson Assistant instance"));
+        }
+      };
+
+      checkInstance();
+    });
+  };
+
+  // Create a global function to send messages with retry logic
+  window.sendWatsonMessage = async function (text) {
+    try {
+      const instance = await window.getWatsonInstance();
+      await instance.send({ input: { text } });
+    } catch (error) {
+      console.error("Failed to send message to Watson:", error);
+    }
+  };
+
   window.watsonAssistantChatOptions = {
-    integrationID: "014df85f-00b8-4372-8bb7-80fe1988a97a", // The ID of this integration.
-    region: "eu-de", // The region your integration is hosted in.
-    serviceInstanceID: "7a8af923-faf2-4b22-8822-f29c70886c77", // The ID of your service instance.
+    integrationID: "014df85f-00b8-4372-8bb7-80fe1988a97a",
+    region: "eu-de",
+    serviceInstanceID: "7a8af923-faf2-4b22-8822-f29c70886c77",
     onLoad: async (instance) => {
+      // Store instance in the global options
+      window.watsonAssistantChatOptions.instance = instance;
+      console.log("Watson Assistant instance initialized"); // Debug log
       await instance.render();
+      // moveWatsonWidget();
     },
   };
   setTimeout(function () {
@@ -39,16 +134,49 @@ import Dashboard from "@/components/dashboard";
 </script>
 
 <style is:global>
-  .WACBotContainer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 180px; /* Adjust this value as needed */
+  #WACWidget {
+    position: relative !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: 50vh !important;
+    max-height: 70vh !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-top: 33px !important;
+    /* padding: 0px !important; */
+    /* padding-left: 10vw !important; */
+    max-width: none !important;
   }
 
-  /* #WACInputContainer-TextArea {
-    background: red !important;
+  .WatsonAssistantChatHost[style*="width"],
+  .WatsonAssistantChatHost[style*="height"] {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: 100% !important;
+    min-height: 100% !important;
+    position: relative !important;
+    padding: 20px !important;
+    display: flex !important;
+  }
+
+  .WACInputContainer {
+    background: #96beb1 !important;
+  }
+
+  #WAC__messages {
+    background: #c2eadb !important;
+  }
+
+  .WAC__sent--bubble {
+    background: #45c05b !important;
+    border: 1px solid #1b684f !important;
+  }
+  /* 
+  [role="tabpanel"] {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   } */
 </style>
