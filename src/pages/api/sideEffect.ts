@@ -15,6 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
       inactiveIngredients,
       activeIngredients,
       structuredProductLabeling,
+      userSettings,
     } = body;
 
     // Initialize Together AI client
@@ -26,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     const systemPrompt = `You are a knowledgeable medical assistant. Analyze the provided medication information for side effects and herbal alternatives. 
 
 IMPORTANT: Respond ONLY with a JSON object. Do not include any additional text, markdown formatting, or code blocks.
-
+Here are the user settings: ${userSettings} you have to follow these settings to answer the question.
 The JSON response must follow this exact structure:
 {
   "side_effects": {
@@ -61,8 +62,12 @@ The JSON response must follow this exact structure:
             Indications: ${indicationsText}
             Warnings: ${warningsText}
             Patient Info: ${patientInfoText}
+            Storage Information: ${storageText}
             Active Ingredients: ${JSON.stringify(activeIngredients)}
-            Inactive Ingredients: ${JSON.stringify(inactiveIngredients)}`,
+            Inactive Ingredients: ${JSON.stringify(inactiveIngredients)}
+            Structured Product Labeling: ${JSON.stringify(
+              structuredProductLabeling
+            )}`,
         },
       ],
       model: "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",

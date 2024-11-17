@@ -73,6 +73,24 @@ export default function SettingsPanel({
           language.name.toLowerCase().includes(languageQuery.toLowerCase())
         );
 
+  const formatUserSettingsText = (
+    settings: UserSettings,
+    clarity: { id: string; label: string }
+  ) => {
+    const conditions = getAvailableConditions()
+      .filter((c) => settings.conditions.includes(c.id))
+      .map((c) => c.label)
+      .join(", ");
+
+    return `User Info:
+Sex: ${settings.sex.charAt(0).toUpperCase() + settings.sex.slice(1)}
+Medical Conditions: ${conditions || "None specified"}
+Age Range: ${settings.age.range}
+The user requested that you use ${clarity.label.toLowerCase()} clarity level with your responses and reply in ${
+      settings.language.name
+    } language.`;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-4 transition-all">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Settings</h2>

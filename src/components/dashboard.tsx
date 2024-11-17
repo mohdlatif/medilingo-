@@ -21,14 +21,25 @@ declare global {
 }
 
 // API utility function
-const api_calls = async (data: string) => {
+const api_calls = async (
+  data: string,
+  settings: UserSettings,
+  selectedClarity: { id: string; label: string }
+) => {
   try {
+    // Format user settings
+    const userSettingsText = `User Info:
+Sex: ${settings.sex.charAt(0).toUpperCase() + settings.sex.slice(1)}
+Medical Conditions: ${settings.conditions.join(", ") || "None specified"}
+Age Range: ${settings.age.range}
+The user requested that you use ${selectedClarity.label.toLowerCase()} clarity level with your responses and reply in ${
+      settings.language.name
+    } language.`;
+
     // First API call to confirmMed
     const medResponse = await fetch("/api/confirmMed", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ medicine: data }),
     });
     const medData = await medResponse.json();
@@ -38,23 +49,21 @@ const api_calls = async (data: string) => {
       throw new Error("Failed to get medication name");
     }
 
-    // Second API call to FDA using the brand name
+    // Second API call to FDA - now including user settings
     const fdaResponse = await fetch("/api/fda", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ brand_name: medData.brand_name }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        brand_name: medData.brand_name,
+      }),
     });
     const fdaData = await fdaResponse.json();
     showToast("Fetched FDA data", "success");
 
-    // Third API call to get side effects and herbal alternatives
+    // Third API call to get side effects and herbal alternatives - now including user settings
     const sideEffectResponse = await fetch("/api/sideEffect", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         medicineName: medData.brand_name,
         purposeText: fdaData.data.results?.[0]?.purpose?.[0] || "",
@@ -69,15 +78,16 @@ const api_calls = async (data: string) => {
         activeIngredients: fdaData.data.results?.[0]?.active_ingredient || [],
         structuredProductLabeling:
           fdaData.data.results?.[0]?.spl_product_data_elements || [],
+        userSettings: userSettingsText,
       }),
     });
     const sideEffectData = await sideEffectResponse.json();
     showToast("Analyzed side effects and alternatives", "success");
 
     await window.sendWatsonMessage(
-      `I'm looking up information about ${medData.brand_name}`
+      `I'm looking up information about ${medData.brand_name}\n\n${userSettingsText}`
     );
-    // Return all data immediately so UI can update
+
     return {
       fdaData,
       sideEffectData,
@@ -85,7 +95,10 @@ const api_calls = async (data: string) => {
         const watsonResponse = await fetch("/api/watson", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: fdaData }),
+          body: JSON.stringify({
+            prompt: fdaData,
+            userSettings: userSettingsText,
+          }),
         });
         return await watsonResponse.json();
       },
@@ -135,7 +148,7 @@ export default function Dashboard() {
       showToast("Fetching medicine information...", "success");
 
       try {
-        const result = await api_calls(searchQuery);
+        const result = await api_calls(searchQuery, settings, selectedClarity);
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
@@ -203,9 +216,12 @@ export default function Dashboard() {
         setSelectedMedicine(data.medicineName);
         showToast(`Medicine detected: ${data.medicineName}`, "success");
 
-        // Use the same api_calls function as the search input
         setIsLoadingMedInfo(true);
-        const result = await api_calls(data);
+        const result = await api_calls(
+          data.medicineName,
+          settings,
+          selectedClarity
+        );
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
