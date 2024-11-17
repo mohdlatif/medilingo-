@@ -1,23 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Tab,
-  Select,
-  TabList,
-  TabPanel,
-  TabPanels,
-  TabGroup,
-} from "@headlessui/react";
-import {
-  Camera,
-  Search,
-  Volume2,
-  Settings,
-  X,
-  Pill,
-  Leaf,
-  AlertTriangle,
-  Info,
-} from "lucide-react";
+
 import {
   languages,
   clarityLevels,
@@ -36,11 +18,6 @@ declare global {
   interface Window {
     sendWatsonMessage: (message: string) => Promise<void>;
   }
-}
-
-interface FormattedIngredients {
-  active: string[];
-  inactive: string[];
 }
 
 // API utility function
@@ -97,6 +74,9 @@ const api_calls = async (data: string) => {
     const sideEffectData = await sideEffectResponse.json();
     showToast("Analyzed side effects and alternatives", "success");
 
+    await window.sendWatsonMessage(
+      `I'm looking up information about ${medData.brand_name}`
+    );
     // Return all data immediately so UI can update
     return {
       fdaData,
