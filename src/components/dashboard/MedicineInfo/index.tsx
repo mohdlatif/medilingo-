@@ -10,6 +10,7 @@ export default function MedicineInfo({
   selectedMedicine,
   imgAnalyzed,
   fdaData,
+  sideEffectData, // This contains both sideEffects and herbalAlternatives
   handleSpeak,
   isLoading,
 }: MedicineInfoProps) {
@@ -46,17 +47,34 @@ export default function MedicineInfo({
 
         <TabPanels className="mt-4">
           <TabPanel>
-            <OverviewTab fdaData={fdaData} handleSpeak={handleSpeak} isLoading={isLoading} />
+            <OverviewTab
+              fdaData={fdaData}
+              handleSpeak={handleSpeak}
+              isLoading={isLoading}
+              sideEffectData={sideEffectData}
+            />
           </TabPanel>
           <TabPanel>
-            <IngredientsTab fdaData={fdaData} handleSpeak={handleSpeak} isLoading={isLoading} />
+            <IngredientsTab
+              fdaData={fdaData}
+              handleSpeak={handleSpeak}
+              isLoading={isLoading}
+              sideEffectData={sideEffectData}
+            />
           </TabPanel>
           <TabPanel>
-            <SideEffectsTab fdaData={fdaData} handleSpeak={handleSpeak} isLoading={isLoading} />
+            <SideEffectsTab
+              sideEffectData={sideEffectData?.data?.sideEffects}
+              fdaData={fdaData}
+              handleSpeak={handleSpeak}
+              isLoading={isLoading}
+            />
           </TabPanel>
           <TabPanel>
             <HerbalAlternativesTab
               fdaData={fdaData}
+              herbalData={sideEffectData?.data?.herbalAlternatives}
+              sideEffectData={sideEffectData}
               handleSpeak={handleSpeak}
               isLoading={isLoading}
             />

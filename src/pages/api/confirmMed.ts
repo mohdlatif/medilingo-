@@ -6,15 +6,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
 
-    // if (!body.medicine) {
-    //   return new Response(
-    //     JSON.stringify({
-    //       message: "Error: Medicine name is required in request body",
-    //     }),
-    //     { status: 400, headers: { "Content-Type": "application/json" } }
-    //   );
-    // }
-
     // Initialize Together AI client
     const together = new Together({
       apiKey: import.meta.env.TOGETHER_API_KEY,

@@ -60,14 +60,24 @@ export interface FormattedIngredients {
 
 export interface MedicineInfoProps {
   selectedMedicine: string;
-  imgAnalyzed: ImgAnalysisResult | null;
+  imgAnalyzed: {
+    medicineName: string;
+    alternativeNames: string[];
+    fullText: string;
+    objects: string[];
+    logos: string[];
+    labels: string[];
+  } | null;
   fdaData: any;
+  sideEffectData: any; // Add this line
   handleSpeak: (text: string) => void;
   isLoading: boolean;
 }
 
 export interface TabContentProps {
   fdaData: any;
+  herbalData?: any;
+  sideEffectData: any;
   handleSpeak: (text: string) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 }

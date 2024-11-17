@@ -17,12 +17,14 @@ export default function OverviewTab({
   const warningsText = fdaData?.data?.results?.[0]?.warnings_and_cautions?.[0];
   const patientInfoText =
     fdaData?.data?.results?.[0]?.information_for_patients?.[0];
+  const storageText = fdaData?.data?.results?.[0]?.storage_and_handling?.[0];
 
   const speechText = [
     purposeText && `Purpose: ${purposeText}`,
     indicationsText && `Indications and Usage: ${indicationsText}`,
     warningsText && `Warnings and Cautions: ${warningsText}`,
     patientInfoText && `Information for Patients: ${patientInfoText}`,
+    storageText && `Storage and Handling: ${storageText}`,
   ]
     .filter(Boolean)
     .join(". ");
@@ -53,6 +55,12 @@ export default function OverviewTab({
             <div>
               <h3 className="font-semibold mb-2">Information for Patients</h3>
               <p className="text-gray-700">{patientInfoText}</p>
+            </div>
+          )}
+          {storageText && (
+            <div>
+              <h3 className="font-semibold mb-2">Storage & Handling</h3>
+              <p className="text-gray-700">{storageText}</p>
             </div>
           )}
         </div>

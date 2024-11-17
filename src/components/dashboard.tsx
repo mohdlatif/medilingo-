@@ -72,9 +72,35 @@ const api_calls = async (data: string) => {
     const fdaData = await fdaResponse.json();
     showToast("Fetched FDA data", "success");
 
-    // Return FDA data immediately so UI can update
+    // Third API call to get side effects and herbal alternatives
+    const sideEffectResponse = await fetch("/api/sideEffect", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        medicineName: medData.brand_name,
+        purposeText: fdaData.data.results?.[0]?.purpose?.[0] || "",
+        indicationsText:
+          fdaData.data.results?.[0]?.indications_and_usage?.[0] || "",
+        warningsText: fdaData.data.results?.[0]?.warnings?.[0] || "",
+        patientInfoText:
+          fdaData.data.results?.[0]?.patient_information?.[0] || "",
+        storageText: fdaData.data.results?.[0]?.storage_and_handling?.[0] || "",
+        inactiveIngredients:
+          fdaData.data.results?.[0]?.inactive_ingredient || [],
+        activeIngredients: fdaData.data.results?.[0]?.active_ingredient || [],
+        structuredProductLabeling:
+          fdaData.data.results?.[0]?.spl_product_data_elements || [],
+      }),
+    });
+    const sideEffectData = await sideEffectResponse.json();
+    showToast("Analyzed side effects and alternatives", "success");
+
+    // Return all data immediately so UI can update
     return {
       fdaData,
+      sideEffectData,
       async getWatsonData() {
         const watsonResponse = await fetch("/api/watson", {
           method: "POST",
@@ -115,6 +141,7 @@ export default function Dashboard() {
   const [isLoadingMedInfo, setIsLoadingMedInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fdaData, setFdaData] = useState<any>(null);
+  const [sideEffectData, setSideEffectData] = useState<any>(null);
 
   useEffect(() => {
     saveSettings(settings);
@@ -129,14 +156,13 @@ export default function Dashboard() {
 
       try {
         const result = await api_calls(searchQuery);
-        setFdaData(result.fdaData); // Set FDA data immediately
+        setFdaData(result.fdaData);
+        setSideEffectData(result.sideEffectData);
 
         // Start Watson API call in background
         result
           .getWatsonData()
           .then((watsonData) => {
-            // Handle Watson data when it arrives
-            // setWatsonData(watsonData);
             showToast("Watson response retrieved", "success");
           })
           .catch((error) => {
@@ -196,18 +222,33 @@ export default function Dashboard() {
       if (data.medicineName) {
         setSelectedMedicine(data.medicineName);
         showToast(`Medicine detected: ${data.medicineName}`, "success");
+
+        // Use the same api_calls function as the search input
+        setIsLoadingMedInfo(true);
+        const result = await api_calls(data);
+        setFdaData(result.fdaData);
+        setSideEffectData(result.sideEffectData);
+
+        // Start Watson API call in background
+        result
+          .getWatsonData()
+          .then((watsonData) => {
+            showToast("Watson response retrieved", "success");
+          })
+          .catch((error) => {
+            console.error("Watson API error:", error);
+            showToast("Watson processing failed", "error");
+          });
       } else {
         showToast("Could not detect medicine name clearly", "error");
       }
-
-      const secondResult = await api_calls(data);
-      setFdaData(secondResult.fdaData);
     } catch (error) {
       console.error("Error processing image:", error);
       showToast("Failed to analyze image", "error");
       throw error;
     } finally {
       setIsAnalyzing(false);
+      setIsLoadingMedInfo(false);
     }
   };
 
@@ -261,6 +302,7 @@ export default function Dashboard() {
               selectedMedicine={selectedMedicine}
               imgAnalyzed={imgAnalyzed}
               fdaData={fdaData}
+              sideEffectData={sideEffectData}
               handleSpeak={handleSpeak}
               isLoading={isLoadingMedInfo}
             />
