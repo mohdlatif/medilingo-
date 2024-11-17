@@ -12,15 +12,12 @@ export default function HerbalAlternativesTab({
   herbalData,
   handleSpeak,
 }: TabContentProps) {
-  console.log("herbalData:", herbalData);
-
   const analysisData = (() => {
     try {
       return typeof herbalData?.analysis === "string"
         ? JSON.parse(herbalData.analysis)
         : herbalData?.analysis || null;
     } catch (error) {
-      console.error("Error parsing herbal alternatives data:", error);
       return null;
     }
   })();

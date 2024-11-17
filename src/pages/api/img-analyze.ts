@@ -69,8 +69,6 @@ export const POST: APIRoute = async ({ request }) => {
       labels: result.labelAnnotations?.map((label) => label.description) || [],
     };
 
-    console.log("Vision AI response:", response);
-
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: {
@@ -78,7 +76,6 @@ export const POST: APIRoute = async ({ request }) => {
       },
     });
   } catch (error) {
-    console.error("Vision AI Error:", error);
     return new Response(
       JSON.stringify({
         error: "Failed to analyze image",

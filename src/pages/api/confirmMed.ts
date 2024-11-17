@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
         {
           role: "system",
           content:
-            "You are a helpful assistant that provides information about medications. Here is the information about the medicine, please return ONLY the medicine brand_name so then we can verify it from the FDA database. Return only the brand_name, nothing else. Do not add any explanations or additional text.\n\nExample:\nTylenol",
+            "You are a helpful assistant that provides information about medications. Here is the information about the medicine, please return ONLY the medicine brand_name that matches these descriptions so then we can verify it from the FDA database. Return only the brand_name, nothing else. Do not add any explanations or additional text. It does not necessarily be mentioned but based on the descriptions, please return the most likely brand_name.\n\nExample:\nTylenol",
         },
         {
           role: "user",
@@ -30,6 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
       stop: ["\n"],
     });
 
+    console.log(response);
     // Return only the content from choices
     return new Response(
       JSON.stringify({

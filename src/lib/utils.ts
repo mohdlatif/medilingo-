@@ -27,9 +27,7 @@ export const getStoredSettings = (): UserSettings => {
         }
         return parsed;
       }
-    } catch (error) {
-      console.error("Error parsing stored settings:", error);
-    }
+    } catch (error) {}
   }
   return defaultSettings;
 };

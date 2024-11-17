@@ -159,13 +159,11 @@ export default function Dashboard() {
             showToast("Watson response retrieved", "success");
           })
           .catch((error) => {
-            console.error("Watson API error:", error);
             showToast("Watson processing failed", "error");
           });
 
         showToast("Medicine information retrieved successfully", "success");
       } catch (error) {
-        console.error("Error fetching medicine information:", error);
         showToast(
           error instanceof Error
             ? error.message
@@ -217,11 +215,7 @@ export default function Dashboard() {
         showToast(`Medicine detected: ${data.medicineName}`, "success");
 
         setIsLoadingMedInfo(true);
-        const result = await api_calls(
-          data.medicineName,
-          settings,
-          selectedClarity
-        );
+        const result = await api_calls(data, settings, selectedClarity);
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
@@ -232,14 +226,12 @@ export default function Dashboard() {
             showToast("Watson response retrieved", "success");
           })
           .catch((error) => {
-            console.error("Watson API error:", error);
             showToast("Watson processing failed", "error");
           });
       } else {
         showToast("Could not detect medicine name clearly", "error");
       }
     } catch (error) {
-      console.error("Error processing image:", error);
       showToast("Failed to analyze image", "error");
       throw error;
     } finally {

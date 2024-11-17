@@ -63,9 +63,7 @@ import Dashboard from "@/components/dashboard";
     try {
       const instance = await window.getWatsonInstance();
       await instance.send({ input: { text } });
-    } catch (error) {
-      console.error("Failed to send message to Watson:", error);
-    }
+    } catch (error) {}
   };
 
   window.watsonAssistantChatOptions = {
@@ -91,7 +89,6 @@ import Dashboard from "@/components/dashboard";
           if (
             locationKeywords.some((keyword) => userMessage.includes(keyword))
           ) {
-            console.log("Location keyword detected");
             navigator.geolocation.getCurrentPosition(
               (data) => takeLocation(data, instance),
               (error) => getLocationError(error, instance)

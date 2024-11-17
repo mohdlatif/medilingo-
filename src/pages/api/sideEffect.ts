@@ -82,7 +82,6 @@ The JSON response must follow this exact structure:
     try {
       analysisData = aiResponse ? JSON.parse(aiResponse) : null;
     } catch (error) {
-      console.error("Error parsing AI response:", error);
       return new Response(
         JSON.stringify({
           message: "Error parsing AI response",
