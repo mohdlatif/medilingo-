@@ -358,7 +358,16 @@ export default function SettingsPanel({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Clarity Level
                 </label>
-                <Listbox value={selectedClarity} onChange={setSelectedClarity}>
+                <Listbox
+                  value={selectedClarity}
+                  onChange={(value) => {
+                    setSelectedClarity(value);
+                    setSettings((prev) => ({
+                      ...prev,
+                      clarity: value,
+                    }));
+                  }}
+                >
                   <div className="relative">
                     <ListboxButton
                       className="relative w-full rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-200 

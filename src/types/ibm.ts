@@ -43,3 +43,31 @@ export interface ResponseChunk {
     })[];
   };
 }
+
+export interface ImgAnalysisResult {
+  medicineName: string;
+  alternativeNames: string[];
+  fullText: string;
+  objects: string[];
+  logos: string[];
+  labels: string[];
+}
+
+export interface FormattedIngredients {
+  active: string[];
+  inactive: string[];
+}
+
+export interface MedicineInfoProps {
+  selectedMedicine: string;
+  imgAnalyzed: ImgAnalysisResult | null;
+  fdaData: any;
+  handleSpeak: (text: string) => void;
+  isLoading: boolean;
+}
+
+export interface TabContentProps {
+  fdaData: any;
+  handleSpeak: (text: string) => void;
+  isLoading: boolean;
+}
