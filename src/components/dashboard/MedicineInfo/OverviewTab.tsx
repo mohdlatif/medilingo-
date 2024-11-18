@@ -1,6 +1,7 @@
 import { Volume2 } from "lucide-react";
 import type { TabContentProps } from "@/types/ibm";
 import TabSkeleton from "./TabSkeleton";
+import { speakText } from "@/utils/textToSpeech";
 
 export default function OverviewTab({
   fdaData,
@@ -28,6 +29,17 @@ export default function OverviewTab({
   ]
     .filter(Boolean)
     .join(". ");
+
+  const handleVoiceClick = () => {
+    if (speechText) {
+      speakText(speechText, {
+        rate: 0.9,
+        pitch: 1,
+        languageCode: "en-US",
+        languageName: "English",
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -66,8 +78,9 @@ export default function OverviewTab({
         </div>
         {speechText && (
           <button
-            onClick={() => handleSpeak(speechText)}
+            onClick={handleVoiceClick}
             className="ml-2 p-2 text-gray-500 hover:text-emerald-600 flex-shrink-0"
+            title="Text to speech"
           >
             <Volume2 className="h-5 w-5" />
           </button>

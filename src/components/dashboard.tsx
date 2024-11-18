@@ -196,12 +196,18 @@ export default function Dashboard() {
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch("/api/img-analyze", {
+      // Convert base64 string by removing data URL prefix
+      const base64Data = (result as string).split(",")[1];
+
+      const response = await fetch("/api/med-analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ imageUrl: result }),
+        body: JSON.stringify({
+          imageData: base64Data,
+          mimeType: file.type,
+        }),
       });
 
       if (!response.ok) {
@@ -209,14 +215,17 @@ export default function Dashboard() {
       }
 
       const data = await response.json();
-      setImgAnalyzed(data);
 
-      if (data.medicineName) {
-        setSelectedMedicine(data.medicineName);
-        showToast(`Medicine detected: ${data.medicineName}`, "success");
+      if (data.brand_name) {
+        setSelectedMedicine(data.brand_name);
+        showToast(`Medicine detected: ${data.brand_name}`, "success");
 
         setIsLoadingMedInfo(true);
-        const result = await api_calls(data, settings, selectedClarity);
+        const result = await api_calls(
+          data.brand_name,
+          settings,
+          selectedClarity
+        );
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
