@@ -91,18 +91,18 @@ The user requested that you use ${selectedClarity.label.toLowerCase()} clarity l
     return {
       fdaData,
       sideEffectData,
-      async getWatsonData() {
-        const watsonResponse = await fetch("/api/watsonx", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fdaData,
-            sideEffectData,
-            userSettings: userSettingsText,
-          }),
-        });
-        return await watsonResponse.json();
-      },
+      // async getWatsonData() {
+      //   const watsonResponse = await fetch("/api/watsonx", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({
+      //       fdaData,
+      //       sideEffectData,
+      //       userSettings: userSettingsText,
+      //     }),
+      //   });
+      //   return await watsonResponse.json();
+      // },
     };
   } catch (error) {
     throw error;
@@ -153,15 +153,15 @@ export default function Dashboard() {
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
-        // Start Watson API call in background
-        result
-          .getWatsonData()
-          .then((watsonData) => {
-            showToast("Watson response retrieved", "success");
-          })
-          .catch((error) => {
-            showToast("Watson processing failed", "error");
-          });
+        // // Start Watson API call in background
+        // result
+        //   .getWatsonData()
+        //   .then((watsonData) => {
+        //     showToast("Watson response retrieved", "success");
+        //   })
+        //   .catch((error) => {
+        //     showToast("Watson processing failed", "error");
+        //   });
 
         showToast("Medicine information retrieved successfully", "success");
       } catch (error) {
@@ -229,15 +229,15 @@ export default function Dashboard() {
         setFdaData(result.fdaData);
         setSideEffectData(result.sideEffectData);
 
-        // Start Watson API call in background
-        result
-          .getWatsonData()
-          .then((watsonData) => {
-            showToast("Watson response retrieved", "success");
-          })
-          .catch((error) => {
-            showToast("Watson processing failed", "error");
-          });
+        // // Start Watson API call in background
+        // result
+        //   .getWatsonData()
+        //   .then((watsonData) => {
+        //     showToast("Watson response retrieved", "success");
+        //   })
+        //   .catch((error) => {
+        //     showToast("Watson processing failed", "error");
+        //   });
       } else {
         showToast("Could not detect medicine name clearly", "error");
       }
