@@ -75,8 +75,8 @@
 ### **Installation Steps**  
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/your-repo/medi-lingo.git
-   cd medi-lingo
+   git clone https://github.com/mohdlatif/medilingo-
+   cd medilingo-
    ```  
 2. Install dependencies:  
    ```bash
