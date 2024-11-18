@@ -28,8 +28,8 @@
 
 ## **Technologies Used**
 
-- **OCR (Optical Character Recognition)**  
-   - Extracts medication names from uploaded images.  
+- **Google Vision API**  
+   - Provides sophisticated image recognition and processing capabilities.  
 
 - **IBM Watson Assistant**  
    - Handles conversational flow, intent detection, and personalized responses.  
@@ -37,7 +37,7 @@
 - **Watson Discovery**  
    - Retrieves and indexes medical data from trusted sources.  
 
-- **OpenAI API**  
+- **Llama AI**  
    - Generates detailed and context-aware responses, simplifying technical terms as needed.  
 
 - **FDA API**  
@@ -69,7 +69,7 @@
 ## **Setup and Installation**  
 
 ### **Prerequisites**  
-- Node.js installed.  
+- Bun installed.  
 - Access to APIs: IBM Watson Assistant, Watson Discovery, OpenAI, FDA API.  
 
 ### **Installation Steps**  
@@ -80,7 +80,7 @@
    ```  
 2. Install dependencies:  
    ```bash
-   npm install
+   bun install
    ```  
 3. Configure API keys in a `.env` file:  
    ```env
@@ -91,7 +91,7 @@
    ```  
 4. Start the application:  
    ```bash
-   npm start
+   bun run dev
    ```  
 
 ---
